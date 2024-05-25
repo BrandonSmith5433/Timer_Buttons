@@ -1,8 +1,6 @@
 from buttons import PlayerButton, AcceptButton
-from gpiozero import Device
+from gpiozero import Device, LEDBoard
 from gpiozero.pins.mock import MockFactory
-
-Device.pin_factory = MockFactory()
 
 
 # White button
@@ -28,33 +26,42 @@ BLUE_BTN_LED = 26
 # Accept button
 ACCEPT_BTN_PIN = 0
 
-buttons = {
-    'white': PlayerButton(
+LED_BOARD = LEDBoard(
+    white=17,
+    green=24,
+    red=5,
+    yellow=20,
+    blue=26
+)
+
+BUTTON_MAP = {
+    WHITE_BTN_PIN: PlayerButton(
         color='white',
         button_pin=WHITE_BTN_PIN,
         led_pin=WHITE_BTN_LED,
     ),
-    'green': PlayerButton(
+    GREEN_BTN_PIN: PlayerButton(
         color='green',
         button_pin=GREEN_BTN_PIN,
         led_pin=GREEN_BTN_LED,
     ),
-    'red': PlayerButton(
+    RED_BTN_PIN: PlayerButton(
         color='red',
         button_pin=RED_BTN_PIN,
         led_pin=RED_BTN_LED,
     ),
-    'yellow': PlayerButton(
+    YELLOW_BTN_PIN: PlayerButton(
         color='yellow',
         button_pin=YELLOW_BTN_PIN,
         led_pin=YELLOW_BTN_LED,
     ),
-    'blue': PlayerButton(
+    BLUE_BTN_PIN: PlayerButton(
         color='blue',
         button_pin=BLUE_BTN_PIN,
         led_pin=BLUE_BTN_LED,
     ),
-    'accept': AcceptButton(
-        button_pin=ACCEPT_BTN_PIN,
-    ),
 }
+
+ACCEPT_BUTTON = AcceptButton(
+    button_pin=ACCEPT_BTN_PIN,
+)
