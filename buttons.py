@@ -5,12 +5,12 @@ from gpiozero import Button, LED
 
 
 
-class PlayerButton():
+class PlayerButton(Button):
     '''Class for player button and LED'''
 
     def __init__(self, color: str, button_pin: int, led_pin: int):
         super().__init__(
-            button_pin=button_pin,
+            button_pin,
             hold_time=2,
         )
         self.color = color

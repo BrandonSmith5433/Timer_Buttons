@@ -24,15 +24,7 @@ BLUE_BTN_PIN = 19
 BLUE_BTN_LED = 26
 
 # Accept button
-ACCEPT_BTN_PIN = 0
-
-LED_BOARD = LEDBoard(
-    white=17,
-    green=24,
-    red=5,
-    yellow=20,
-    blue=26
-)
+ACCEPT_BTN_PIN = 25
 
 BUTTON_MAP = {
     WHITE_BTN_PIN: PlayerButton(
