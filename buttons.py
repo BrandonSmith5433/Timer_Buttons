@@ -1,5 +1,4 @@
 from time import sleep
-from functools import wraps
 from typing import List
 
 from gpiozero import Button, LED

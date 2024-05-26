@@ -1,10 +1,19 @@
-from time import sleep
-
 from typing import List
 
 from config import BUTTON_LIST, ACCEPT_BUTTON, PLAYER_BUTTON_BOARD
 from buttons import PlayerButton, AcceptButton, PlayerButtonBoard
 
+# --------------------
+# Session States
+# --------------------
+"""
+Session states control how buttons behave at different stages of the program.
+
+- Setup:    the stage when players select which buttons are in the game
+- Game:     the stage when a single player is active and being timed
+- Pause:    the stage when no player is active and the program is waiting
+            for a new active player
+"""
 class SessionState():
     '''Base class for session state'''
 
@@ -20,15 +29,15 @@ class SessionState():
         '''Function when PlayerButton is pressed'''
         pass
 
-    def startup_pattern():
+    def _startup_pattern():
         '''LED pattern on startup'''
         pass
 
-    def set_accept_button_pressed(self):
+    def _set_accept_button_pressed(self):
         '''Set accept button press function'''
         pass
 
-    def set_player_button_pressed(self):
+    def _set_player_button_pressed(self):
         '''Set player buttons press function'''
         pass
 
@@ -102,11 +111,12 @@ class GameState(SessionState):
         '''Start session state'''
         self.startup_pattern()
 
-
-
-
-    
-
+# --------------------
+# Session
+# --------------------
+"""
+A session is a single game. Session states are an attribute of a session.
+"""
 class Session():
     '''Class for session'''
 

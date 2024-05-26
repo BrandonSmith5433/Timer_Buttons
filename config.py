@@ -1,7 +1,4 @@
 from buttons import PlayerButton, AcceptButton, PlayerButtonBoard
-from gpiozero import Device, LEDBoard
-from gpiozero.pins.mock import MockFactory
-
 
 # White button
 WHITE_BTN_PIN = 27
