@@ -10,6 +10,7 @@ class PlayerButton(Button):
         super().__init__(
             button_pin,
             hold_time=2,
+            bounce_time = 0.1
         )
         self.color = color
         self.led = LED(led_pin)
@@ -58,6 +59,25 @@ class PlayerButton(Button):
                 self.led_off()
                 sleep(delay)
 
+    def when_held2(self, func):
+        '''
+        Function to pass to when_held as lambda function
+            example:
+            button.when_held = lambda x: button.when_held2(button.led_toggle)
+        '''
+        self.running = True
+        func()
+
+    def when_released2(self, func):
+        '''
+        Function to pass to when_released as lambda function
+            example:
+            button.when_released = lambda x: button.when_released2(button.led_toggle)
+        '''
+        if not self.running:
+            func()
+        self.running = False
+
 
 class AcceptButton(Button):
     '''Class for the accept button'''
@@ -68,11 +88,30 @@ class AcceptButton(Button):
             hold_time=5,
         )
 
+    def when_held2(self, func):
+        '''
+        Function to pass to when_held as lambda function
+            example:
+            button.when_held = lambda x: button.when_held2(button.led_toggle)
+        '''
+        self.running = True
+        func()
+
+    def when_released2(self, func):
+        '''
+        Function to pass to when_released as lambda function
+            example:
+            button.when_released = lambda x: button.when_released2(button.led_toggle)
+        '''
+        if not self.running:
+            func()
+        self.running = False
+
 class PlayerButtonBoard():
     '''Class for group of PlayerButtons'''
 
     def __init__(self, buttons: List[PlayerButton]):
-        self.buttons=buttons
+        self.buttons = buttons
         
 
     def led_cycle(self, num: int = 1, delay: float = 0.25):
