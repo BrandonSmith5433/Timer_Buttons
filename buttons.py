@@ -1,4 +1,4 @@
-from time import sleep
+from time import sleep, time
 from typing import List
 
 from gpiozero import Button, LED
@@ -19,6 +19,7 @@ class PlayerButton(Button):
         self.is_disabled = False
         self.is_active_button = False
         self.is_player_turn = False
+        self.turn_start_time = None
 
     def disabled_toggle(self):
         '''Toggles disabled state'''
@@ -26,15 +27,16 @@ class PlayerButton(Button):
 
     def active_button_toggle(self):
         '''Toggles active state'''
-        self.is_active_button = not self.is_active_button
+        if not self.is_disabled:
+            self.is_active_button = not self.is_active_button
 
     def player_turn_toggle(self):
         '''Toggles player turn state'''
         if not self.is_disabled:
-            self.is_player_turn = not self.is_player_turn
-            while self.is_player_turn:
-                sleep(1)
-                self.total_time += 1
+            if self.is_player_turn:
+                self._end_turn()
+            else:
+                self._start_turn()
 
     def led_on(self):
         '''Turns button LED on'''
@@ -48,16 +50,36 @@ class PlayerButton(Button):
 
     def led_toggle(self):
         '''Toggles button LED state'''
-        self.led.toggle()
+        if not self.is_disabled:
+            self.led.toggle()
 
-    def led_flash(self, flashes: int, delay: float = 0.05):
+    def led_flash(self, num: int, delay: float = 0.05):
         '''Flashes LED a number of times'''
         if not self.is_disabled:
-            for i in range(flashes):
+            for i in range(num):
                 self.led_on()
                 sleep(delay)
                 self.led_off()
                 sleep(delay)
+
+    def start_turn(self):
+        '''Starts player timer'''
+        self.is_player_turn = True
+        self.turn_start_time = time()
+
+    def end_turn(self):
+        '''Ends player timer'''
+        self.is_player_turn = False
+        self.total_time += int(time() - self.turn_start_time)
+
+    def reset(self):
+        '''Resets button'''
+        self.total_time = 0
+        self.running = False
+        self.is_disabled = False
+        self.is_active_button = False
+        self.is_player_turn = False
+        self.led_off()
 
     def when_held2(self, func):
         '''
@@ -114,13 +136,19 @@ class PlayerButtonBoard():
         self.buttons = buttons
         
 
-    def led_cycle(self, num: int = 1, delay: float = 0.25):
+    def led_cycle(self, num: int = 1, delay: float = 0.25, reverse = False):
         '''Cycles the LEDs on and off in order'''
         for _ in range(num):
-            for button in self.buttons:
-                button.led_on()
-                sleep(delay)
-                button.led_off()
+            if not reverse:
+                for button in self.buttons:
+                    button.led_on()
+                    sleep(delay)
+                    button.led_off()
+            else:
+                for button in self.buttons[::-1]:
+                    button.led_on()
+                    sleep(delay)
+                    button.led_off()
 
     def led_flash(self, num: int = 1, delay: float = 0.25):
         '''Flashes the LEDS on and off'''
