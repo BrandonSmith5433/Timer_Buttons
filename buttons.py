@@ -34,9 +34,9 @@ class PlayerButton(Button):
         '''Toggles player turn state'''
         if not self.is_disabled:
             if self.is_player_turn:
-                self._end_turn()
+                self.end_turn()
             else:
-                self._start_turn()
+                self.start_turn()
 
     def led_on(self):
         '''Turns button LED on'''
