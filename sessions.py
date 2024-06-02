@@ -147,43 +147,52 @@ class SetupState(SessionState):
         self.button_board = button_board
         self.is_active = True
         self.active_buttons = set()
+        # initialize class
 
     def _accept_button_pressed(self):
         '''Function when AcceptButton is pressed'''
         inactive_buttons = list(set(self.buttons).difference(self.active_buttons))
         for button in inactive_buttons:
-            button.active_button_toggle()
-            button.disabled_toggle()
+            #button.active_button_toggle() ---not needed?
+            button.disabled_toggle() #We would want to make sure buttons are disabled?
+        #super.PlayerButton = self.active_buttons
         self.is_active = False
+        #When accept button is pressed during setup will make a list of inactive buttons by removing the active_buttons from the buttons list, it will then make sure
+        #each button in the list is disabled. It will finally end the SetupState Class
 
     def _player_button_pressed(self, button: PlayerButton):
         '''Function when PlayerButton is pressed'''
         button.led_toggle()
-        button.active_button_toggle()
+        #button.active_button_toggle() --- Not needed for setup?
         if button in self.active_buttons:
             self.active_buttons.remove(button)
         else:
             self.active_buttons.add(button)
+        #When a player button is pressed during this setup, it will turn it off or on, while also adding or removing it from the active_buttons set
 
     def _set_accept_button_pressed(self):
         '''Set accept button press function'''
         self.accept_button.when_pressed = self._accept_button_pressed
+        #calls the _accept_button_pressed function when the accept button is pressed.
 
     def _set_player_button_pressed(self):
         '''Set player buttons press function'''
         for button in self.buttons:
             button.when_pressed = self._player_button_pressed
-
+        #When a player button is pressed this will call the _player_button_pressed function for that color    
+        
     def _startup_pattern(self):
         '''Starting LED pattern'''
         self.button_board.led_cycle(2)
         self.button_board.led_flash(3)
-
+        #This cycles the LED's (2) times and then flashes them all (3) times, that means it is at the setup phase.
+         
     def start(self):
         '''Runs session state pattern and sets button functions'''
         self._startup_pattern()
         self._set_player_button_pressed()
         self._set_accept_button_pressed()
+        #runs the startup pattern LEDcycle(2), LEDflash(3), then runs the functions to have buttons be ready to be pushed.
 
 class GameState(SessionState):
     '''Game session state'''
@@ -196,11 +205,12 @@ class GameState(SessionState):
         super().__init__()
         self.buttons = buttons
         self.button_board = button_board
-
+        #initilaize GameState
 
     def _startup_pattern(self):
         '''Starting LED pattern'''
-        self.button_board.led_flash(num=3)
+        self.button_board.led_flash(num=3) #Mostly irrelevant, but maybe only flash current player colors?
+        #startup pattern for game mode means all buttons should flash 3 times. 
 
     def _set_accept_button_press(self):
         '''Set accept button press function'''
