@@ -26,6 +26,8 @@ end = 0
 pauseStart = 0
 pauseEnd = 0
 y = 0
+z = 0
+held = 0
 
 while y < 7:
     for x in LEDList:
@@ -34,28 +36,23 @@ while y < 7:
         x.off()
     y = y + 1     
 
-for x in LEDList:
-    x.was_held = False
-
-z = 0
-active_player = ButtonList[z]
-
-def press(z: int):
-    if not ButtonList[z].was_held:
+def press_button(z, held):
+    if held == 0:
         timeList[z] = timeList[z] + (end - start)
         timeList[z] = timeList[z] - (pauseEnd - pauseStart)
         reset_timers()
         LEDList[z].off()
         next_turn(z)
-    ButtonList[z].was_held = False
+    else:
+        held = 0
 
-def held(z: int):
-    ButtonList[z].was_held = True
+def held_button(z):
+    held = 1
     pauseStart = timer()
     ButtonList[z].wait_for_press()
     pauseEnd = timer()
 
-def next_turn(z: int):
+def next_turn(z):
     if z < 3:
         z = z + 1
         turn(z)
@@ -63,13 +60,13 @@ def next_turn(z: int):
         z = 0
         turn(z)
 
-def turn(z: int):
+def turn(z):
     while z != 4:
         LEDList[z].on()
         start = timer()
         ButtonList[z].wait_for_press()
-        ButtonList[z].when_held = held()
-        ButtonList[z].when_released = press()
+        ButtonList[z].when_held = held_button(z)
+        ButtonList[z].when_released = press_button(z, held)
         
 def reset_timers():
     start = 0
@@ -77,3 +74,5 @@ def reset_timers():
     pauseStart = 0
     pauseEnd = 0
 
+def output():
+    pass
