@@ -147,6 +147,7 @@ class SetupState(SessionState):
         self.button_board = button_board
         self.is_active = True
         self.active_buttons = set()
+        self.start_player = buttons[0]
         # initialize class
 
     def _accept_button_pressed(self):
@@ -155,7 +156,9 @@ class SetupState(SessionState):
         for button in inactive_buttons:
             #button.active_button_toggle() ---not needed?
             button.disabled_toggle() #We would want to make sure buttons are disabled?
-        #super.PlayerButton = self.active_buttons
+
+        self.start_player()
+
         self.is_active = False
         #When accept button is pressed during setup will make a list of inactive buttons by removing the active_buttons from the buttons list, it will then make sure
         #each button in the list is disabled. It will finally end the SetupState Class
@@ -194,6 +197,12 @@ class SetupState(SessionState):
         self._set_accept_button_pressed()
         #runs the startup pattern LEDcycle(2), LEDflash(3), then runs the functions to have buttons be ready to be pushed.
 
+    def start_player(self):
+        '''Determine start player from active players (choosen randomly)'''
+        self.startplayer = random.choice(self.active_buttons)
+
+
+
 class GameState(SessionState):
     '''Game session state'''
 
@@ -209,8 +218,9 @@ class GameState(SessionState):
 
     def _startup_pattern(self):
         '''Starting LED pattern'''
-        self.button_board.led_flash(num=3) #Mostly irrelevant, but maybe only flash current player colors?
-        #startup pattern for game mode means all buttons should flash 3 times. 
+        self.button_board.led_flash(num=4)
+        self.button_board.led_cycle(2)
+        #startup pattern for game mode means all buttons should flash 4 times. 
 
     def _set_accept_button_press(self):
         '''Set accept button press function'''
@@ -272,7 +282,7 @@ class Session():
             self.session_state = session_state
 
     
-    def start(self):
+    def startup_session_state(self):
         '''Initialize session'''
 
         # Setup state
@@ -287,6 +297,16 @@ class Session():
             buttons = active_buttons,
             button_board = PlayerButtonBoard(active_buttons),
         )
+    
+    def gamestate_session_state(self):
+        '''GameState session state active'''
+
+        self.session_state.start()
+
+        while self.session_state.is_active:
+            pass
+
+        ## maybe stuff here who knows?
 
 
     def reset(self):
