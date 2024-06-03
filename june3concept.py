@@ -21,13 +21,12 @@ ButtonList = [greenButton, redButton, yellowButton, blueButton]
 timeList = [0,0,0,0]
 LEDList = [greenLED, redLED, yellowLED, blueLED]
 
-start, = 0
+start = 0
 end = 0
 pauseStart = 0
 pauseEnd = 0
 y = 0
 z = 0
-held = 0
 
 while y < 7:
     for x in LEDList:
@@ -36,40 +35,47 @@ while y < 7:
         x.off()
     y = y + 1     
 
-def press_button(z, held):
+def press_button():
+    global held
+    global z
     if held == 0:
         end = time()
         timeList[z] = timeList[z] + (end - start)
         timeList[z] = timeList[z] - (pauseEnd - pauseStart)
         reset_timers()
         LEDList[z].off()
-        next_turn(z)
+        next_turn()
     else:
         held = 0
 
-def held_button(z):
+def held_button():
+    global held
+    global z
     held = 1
     pauseStart = time()
     ButtonList[z].wait_for_press()
     pauseEnd = time()
 
-def next_turn(z):
+def next_turn():
+    global z
     if z < 3:
         z = z + 1
-        turn(z)
+        turn()
     else:
         z = 0
-        turn(z)
+        turn()
 
-def turn(z):
+def turn():
+    global z
     while z != 4:
         LEDList[z].on()
         start = time()
         ButtonList[z].wait_for_press()
-        ButtonList[z].when_held = held_button(z)
-        ButtonList[z].when_released = press_button(z, held)
+        ButtonList[z].when_held = held_button
+        ButtonList[z].when_released = press_button
         
 def reset_timers():
+    global start, end, pauseStart, pauseEnd
     start = 0
     end = 0
     pauseStart = 0
@@ -77,3 +83,5 @@ def reset_timers():
 
 def output():
     pass
+
+turn()
