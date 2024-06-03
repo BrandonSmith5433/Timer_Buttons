@@ -1,6 +1,6 @@
 from gpiozero import Button, LED
 from signal import pause
-from time import sleep, timer
+from time import sleep, time
 
 whiteButton = Button(27, bounce_time=.1, hold_time = 1)
 whiteLED = LED(17)
@@ -38,6 +38,7 @@ while y < 7:
 
 def press_button(z, held):
     if held == 0:
+        end = time()
         timeList[z] = timeList[z] + (end - start)
         timeList[z] = timeList[z] - (pauseEnd - pauseStart)
         reset_timers()
@@ -48,9 +49,9 @@ def press_button(z, held):
 
 def held_button(z):
     held = 1
-    pauseStart = timer()
+    pauseStart = time()
     ButtonList[z].wait_for_press()
-    pauseEnd = timer()
+    pauseEnd = time()
 
 def next_turn(z):
     if z < 3:
@@ -63,7 +64,7 @@ def next_turn(z):
 def turn(z):
     while z != 4:
         LEDList[z].on()
-        start = timer()
+        start = time()
         ButtonList[z].wait_for_press()
         ButtonList[z].when_held = held_button(z)
         ButtonList[z].when_released = press_button(z, held)
