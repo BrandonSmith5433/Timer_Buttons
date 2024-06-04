@@ -51,7 +51,6 @@ def turn():
     ButtonList[z].when_held = held_button
     #just pressing the button will calculate the time and add it to your color, It will then reset timers
     ButtonList[z].when_released = release_button
-    pause()
 
 def next_turn():
     if z < 3:
@@ -98,4 +97,5 @@ def output():
 #waits for white to be pressed     
 whiteButton.when_pressed = output()
 #the start of it all
-turn(z)
+turn()
+pause()
