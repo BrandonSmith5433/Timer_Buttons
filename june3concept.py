@@ -1,48 +1,33 @@
-from gpiozero import Button, LED
-from time import sleep, time
+'''from time import sleep, time
 from signal import pause
 import csv
+import Brandon.setup as setup 
 
-whiteButton = Button(27, bounce_time=.1, hold_time = 1)
-whiteLED = LED(17)
+#class PlayerButton():
+    def __init__(self)
+        
+#timeList = [float(0),float(0),float(0),float(0),float(0),]
 
-greenButton = Button(23, bounce_time=.1, hold_time = 1)
-greenLED = LED(24)
-
-redButton = Button(6, bounce_time=.1, hold_time = 1)
-redLED = LED(5)
-
-yellowButton = Button(21, bounce_time=.1, hold_time = 1)
-yellowLED = LED(20)
-
-blueButton = Button(19, bounce_time=.1, hold_time = 1)
-blueLED = LED(26)
-
-ButtonList = [greenButton, redButton, yellowButton, blueButton, whiteButton]
-timeList = []
-LEDList = [greenLED, redLED, yellowLED, blueLED, whiteLED]
 
 #Global Variables
 setup_state = 0 # 0 will start a setup, 1 will go straight to turn
-held = 0
-z = 0
-start = float(0)
-end = float(0)
-pauseStart = float(0)
-pauseEnd = float(0)
+held = 0 # variable needed so that when_held and when_released aren't both activated
+z = 0 # list iterator
+start = float(0) # Timer start when player is active.
+end = float(0) # Timer ends when player is inactive
+pauseStart = float(0) #Timer starts when paused
+pauseEnd = float(0) #Timer ends when unpaused
 
 
-#Startup Sequence
-y = 0
-while y < 5:
+#Startup Sequence - flashes through LED's in order y times
+y = 5
+while y > 0:
     for x in LEDList:
         x.on()
         sleep(.2)
         x.off()
-    y = y + 1
+    y = y - 1
 
-#Will turn on your light for your turn
-#Starts a timer
 def turn():
     global z
     global start
@@ -77,7 +62,6 @@ def release_button():
         held = 0
 
 def held_button():
-    '''Hold the button to pause'''
     global held, z, pauseStart, pauseEnd
     held = 1
     pauseStart = time()
@@ -99,4 +83,4 @@ def output():
 whiteButton.when_pressed = output()
 #the start of it all
 turn()
-pause()
+pause()'''
