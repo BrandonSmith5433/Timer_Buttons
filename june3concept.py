@@ -18,11 +18,12 @@ yellowLED = LED(20)
 blueButton = Button(19, bounce_time=.1, hold_time = 1)
 blueLED = LED(26)
 
-ButtonList = [greenButton, redButton, yellowButton, blueButton]
+ButtonList = [greenButton, redButton, yellowButton, blueButton, whiteButton]
 timeList = []
-LEDList = [greenLED, redLED, yellowLED, blueLED]
+LEDList = [greenLED, redLED, yellowLED, blueLED, whiteLED]
 
 #Global Variables
+setup_state = 0 # 0 will start a setup, 1 will go straight to turn
 held = 0
 z = 0
 start = float(0)
