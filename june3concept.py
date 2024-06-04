@@ -19,7 +19,7 @@ blueButton = Button(19, bounce_time=.1, hold_time = 1)
 blueLED = LED(26)
 
 ButtonList = [greenButton, redButton, yellowButton, blueButton]
-timeList = [0,0,0,0]
+timeList = []
 LEDList = [greenLED, redLED, yellowLED, blueLED]
 
 #Global Variables
@@ -42,7 +42,8 @@ while y < 5:
 
 #Will turn on your light for your turn
 #Starts a timer
-def turn(z):
+def turn():
+    global z
     global start
     LEDList[z].on()
     start = time()
@@ -50,12 +51,15 @@ def turn(z):
     ButtonList[z].when_held = held_button
     #just pressing the button will calculate the time and add it to your color, It will then reset timers
     ButtonList[z].when_released = release_button
+    pause()
+
+def next_turn():
     if z < 3:
         z = z + 1
-        turn(z)
+        turn()
     else:
         z = 0
-        turn(z)
+        turn()
 
 def release_button():
     global held, z, pauseStart, pauseEnd, start, end
@@ -68,24 +72,20 @@ def release_button():
         start = 0
         pauseEnd =0
         LEDList[z].off()
+        next_turn()
     else:
         held = 0
 
 def held_button():
+    '''Hold the button to pause'''
     global held, z, pauseStart, pauseEnd
     held = 1
     pauseStart = time()
+    sleep(2)
     ButtonList[z].wait_for_press()
+    sleep(2)
+    held = 1 #needed a 2nd time due to release activiating on first and 2nd push
     pauseEnd = time()
-
-def next_turn():
-    global z
-    if z < 3:
-        z = z + 1
-        turn()
-    else:
-        z = 0
-        turn()
 
 #writes data to CSV at end
 def output():
@@ -96,6 +96,6 @@ def output():
             writer.writerow([ButtonList[i], timeList[i]])
 
 #waits for white to be pressed     
-ButtonList[4].when_pressed = output()
+whiteButton.when_pressed = output()
 #the start of it all
-turn()
+turn(z)
