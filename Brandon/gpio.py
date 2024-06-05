@@ -1,4 +1,4 @@
-from setup import PlayerButton
+from setup import PlayerButton, AcceptButton
 
 
 player_button_list = [
@@ -29,6 +29,7 @@ player_button_list = [
     )
 ]           
 
+accept_button = AcceptButton(button_pin = 25)
 
 ## Stuff
 

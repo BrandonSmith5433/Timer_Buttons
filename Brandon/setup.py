@@ -1,4 +1,4 @@
-from gpiozero import Button , LED
+from gpiozero import Button, LED
 from time import sleep, time
 
 class PlayerButton(Button):
@@ -12,7 +12,7 @@ class PlayerButton(Button):
         self.led = LED(led_pin)
         self.is_disabled = False
         self.was_held = False
-        self.active_player = set()
+        self.active_player = False
 
     def disableButton(self):
         self.is_disabled = True
@@ -39,31 +39,10 @@ class PlayerButton(Button):
                     self.ledOff()
                     sleep(.1)
 
-
-class GameSetup():
-    def __init__(self, buttons : list[PlayerButton]):
-        self.inactive_buttons = set()
-        self.active_buttons = set()
-        self.buttons = buttons
-        self.is_active = True
-
-    def start(self):
-        '''Runs after initilizing to prepare the buttons and let users know it is working'''
-        PlayerButton.ledCycle(5)
-        for button in PlayerButton:
-            self.ledOff()
-            self.inactive_buttons.add(button)
-    
-    def buttonPressed(self, button : PlayerButton):
-        button.ledToggle()
-        if button in self.inactive_buttons:
-            self.active_buttons.add(button)
-            self.inactive_buttons.remove(button)
-        else:
-            self.active_buttons.remove(button)
-            self.inactive_buttons.add(button)
-
-    def pushToActivate(self):
-        for button in PlayerButton:
-            button.when_pressed = self.buttonPressed
-
+class AcceptButton(Button):
+    def __init__(self, button_pin: int):
+        super().__init__(
+            button_pin,
+            hold_time = 1,
+            bounce_time = .1
+        )
