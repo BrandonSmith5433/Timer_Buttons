@@ -6,13 +6,13 @@ class PlayerButton(Button):
         super().__init__(
             button_pin,
             hold_time=1,
-            bounce_time = 0.1
+            bounce_time = 0.1,
         )
         self.color = color
         self.led = LED(led_pin)
         self.is_disabled = False
         self.was_held = False
-        self.active_player = False
+        self.is_active = True
 
     def disableButton(self):
         self.is_disabled = True
