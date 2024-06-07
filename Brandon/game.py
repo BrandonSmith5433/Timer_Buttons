@@ -1,12 +1,33 @@
 from setup import PlayerButton, AcceptButton
 from gpio import player_button_list, accept_button
 
-class GameSetup():
-    def __init__(self,
-                player_buttons : list[PlayerButton] = player_button_list,
+class GameState():
+    def __init__(
+                self,
+                buttons : list[PlayerButton] = player_button_list,
                 accept_button : AcceptButton = accept_button,
+                ):
+        self.buttons = buttons
+        self.accept_button = accept_button
+        self.current_state = current_state
+
+    def advanceGameState(self):
+        if self.current_state ==  GameSetup:
+            self.current_state = GameActive
+        elif self.current_state == GameActive:
+            self.current_State = GameCleanup
+        self.start()
+
+    def start(self)
+        '''Starts next game state'''
+        self.current_state(self.game_state)
+        
+        
+class GameSetup(GameState):
+    def __init__(self,
+                player_buttons : list[PlayerButton],
+                accept_button : AcceptButton,
             ):
-            super().__init__()
             self.inactive_buttons = set()
             self.active_buttons = set()
             self.player_buttons = player_buttons
@@ -14,8 +35,8 @@ class GameSetup():
 
     def acceptButtonPressed(self):
         for button in self.inactive_buttons:
+            button.ledOff()
             button.disableButton()
-            button.is_active = False
 
     def buttonPressed(self, button : PlayerButton):
         button.ledToggle()
@@ -37,3 +58,13 @@ class GameSetup():
             self.ledOff()
             self.inactive_buttons.add(button)
         self.activateButtons()
+
+class GameActive(GameState):
+    pass
+
+class GameCleanup(GameState):
+    pass
+
+
+
+
