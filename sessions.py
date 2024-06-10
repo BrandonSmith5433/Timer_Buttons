@@ -187,7 +187,7 @@ class SetupState(SessionState):
     def _startup_pattern(self):
         '''Starting LED pattern'''
         self.button_board.led_cycle(2)
-        self.button_board.led_flash(3)
+        self.button_board.led_flash(3   )
         #This cycles the LED's (2) times and then flashes them all (3) times, that means it is at the setup phase.
          
     def start(self):

@@ -12,7 +12,6 @@ class PlayerButton(Button):
         self.led = LED(led_pin)
         self.is_disabled = False
         self.was_held = False
-        self.is_active = True
 
     def disableButton(self):
         self.is_disabled = True
