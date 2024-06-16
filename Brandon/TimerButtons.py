@@ -28,13 +28,11 @@ class SetupAcceptButton(Button):
 		if game_state == 1:
 			Setup.game_state = 2
 		elif game_state == 2:
-			print(len(Setup.turn_order))
-			print(len(Setup.active_list))
 			if len(Setup.turn_order) == len(Setup.active_list):
 				Setup.game_state = 3
 				Setup.turn_order[0].is_live = True
 			else:
-				for button in active_list: # type: ignore
+				for button in active_list:
 					button.ledOff()
 					Setup.turn_order.clear()
 		elif game_state == 3:
@@ -68,10 +66,11 @@ class Setup(Button):
 		self.color = color
 		self.start_time = time()
 		self.end_time = time()
-		self.when_pressed = buttonPress
-		self.when_held = buttonHold
-		self.when_released = buttonRelease
+		self.when_pressed = Setup.buttonPress
+		self.when_held = Setup.buttonHold
+		self.when_released = Setup.buttonRelease
 		self.held = False
+		self.count = 0
 
 	def buttonPress(self):
 		'''What is done when a colored button is pressed'''
@@ -110,11 +109,12 @@ class Setup(Button):
 		match game_state:
 			case 3: #Active gameplay
 				if self.is_live:
-					if self.held == True & count == 1:
+					if self.held == True & self.count == 1:
 						self.held = False
-						count = 0
+						self.count = 0
+						Setup.enter_pause = False
 					elif self.held == True:
-						count = 1
+						self.count = 1
 					else:
 						Setup.active_turn = 1
 
@@ -127,13 +127,21 @@ class Setup(Button):
 			
 	def ledOff(self):
 		self.led.off()
-	
+		
+	def ledFastBlink(self, count):
+		while count != 0:
+			self.led.off()
+			sleep(.1)
+			self.led.on()
+			sleep(.25)
+			count = count - 1
+			
 	def ledBlink(self, count):
 		while count != 0:
-			self.led.on()
-			sleep(1)
 			self.led.off()
-			sleep(1)
+			sleep(.3)
+			self.led.on()
+			sleep(.7)
 			count = count - 1
 		
 	def cycleAll(count):
@@ -176,7 +184,8 @@ class Setup(Button):
 			
 	def cycleTurn():
 		for button in Setup.turn_order:
-			button.ledBlink(Setup.turn_order.index(button))
+			button.ledFastBlink(Setup.turn_order.index(button)+1)
+			button.ledOff()
 
 def gameSetup():
 	Setup.game_state = 1
@@ -198,18 +207,23 @@ def gameInProgress():
 	Setup.cycleTurn()
 	for button in Setup.turn_order:
 		Setup.time_list.append(0)
+		button.ledOff
 	turn(Setup.turn_order[0])
 	
 def turn(button):
+	pause_difference = 0
 	button.is_live = True
 	button.ledOn()
 	button.start_time = time()
 	while Setup.active_turn == 0:
 		if Setup.enter_pause == True:
+			print("enter pause")
 			pause_start = time()
 			while Setup.enter_pause == True:
+				print("pause wait")
 				sleep(.3)
 			pause_end = time()
+			print("exit pause")
 			pause_difference = pause_end - pause_start
 		sleep(.3)
 	Setup.active_turn = 0
