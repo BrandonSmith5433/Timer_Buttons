@@ -1,52 +1,58 @@
 from time import sleep, time
 import csv
+import random
 from gpiozero import Button , LED
 
 ##TODO
 ## I think all hold buttons will have to be worked differntly.  A buttons when_pressed fires instantly when it is pressed. If you were using all 3 (press,release,hold)
 ## press would always fire first, followed by hold, then release. 
 
-## Hold for Pause as active player, hold for remove from round for inactive player
-## extra button ends round -- extra button hold ends game
-## end of round requires turn order to be chosen again
-## Export multiple csv files
+## hold for remove from round for inactive player
+## Export to db
 ## extra button during turn selection selects a random first player(only first time, and other players will have to assign thier places (2nd,3rd...etc))
-
-## probably work on changing names fo things so it's more readable
-## Maybe move the button presses to another file
 
 class SetupAcceptButton(Button):
 	def __init__(self,button_pin):
 		super().__init__(button_pin, bounce_time = .1)
-		self.when_pressed = SetupAcceptButton.acceptButtonPressed
-		self.when_held = SetupAcceptButton.acceptButtonHeld
-		self.when_released = SetupAcceptButton.acceptButtonReleased
-		self.accept_button_held = False
+		self.when_pressed = SetupAcceptButton.press
+		self.when_held = SetupAcceptButton.hold
+		self.when_released = SetupAcceptButton.release
+		self.held = False
 		
-	def acceptButtonPressed(self):
+	def press(self):
 		game_state = Setup.game_state
-		if game_state == 1:
-			Setup.game_state = 2
-		elif game_state == 2:
-			if len(Setup.turn_order) == len(Setup.active_list):
-				Setup.game_state = 3
-				Setup.turn_order[0].is_live = True
-			else:
-				for button in active_list:
-					button.ledOff()
-					Setup.turn_order.clear()
-		elif game_state == 3:
-			Setup.game_state = 4
-			gameEnd()
-	
-	def acceptButtonHeld(self):
-		self.accept_button_held = True
+		match game_state:
+			case 1:
+				Setup.game_state = 2
+			case 2:
+				if len(Setup.turn_order) == len(Setup.active_list):
+					Setup.game_state = 3
+					Setup.turn_order[0].is_live = True
+				else:
+					for button in Setup.active_list:
+						button.ledOff()
+						Setup.turn_order.clear()
+						rando_boi = random.randint(0,len(Setup.active_list))
+						Setup.turn_order.append(Setup.active_list[rando_boi])
+						Setup.turn_order[0].ledOn()
+						print("rando firsty boi")
 
-	def acceptButtonReleased(self):
-		if self.accept_button_held:
-			self.accept_button_held = False
-		else:
-			pass #everything else on release --- probably all that button press shit
+	def hold(self):
+		self.held = True
+		game_state = Setup.game_state
+		match game_state:
+			case 3:  #if accept button is held during gameplay it will trigger game end
+				self.held = True
+				print("the game has ended")
+				gameEnd()
+
+	def release(self):
+		game_state = Setup.game_state
+		match game_state:
+			case 3:  #If accept button is pushed during gameplay it will trigger end of round
+				if not self.held:
+					print("the round has ended")
+					Setup.game_state = 5
 
 class Setup(Button):
 	active_turn = 0
@@ -199,6 +205,7 @@ def gameSetup():
 	
 def turnOrder():
 	Setup.cycleActive(10)
+	Setup.game_state = 2
 	while Setup.game_state == 2:
 		sleep(.3)
 	gameInProgress()
@@ -217,14 +224,15 @@ def turn(button):
 	button.start_time = time()
 	while Setup.active_turn == 0:
 		if Setup.enter_pause == True:
-			print("enter pause")
 			pause_start = time()
 			while Setup.enter_pause == True:
-				print("pause wait")
+				if Setup.game_state == 5:
+					turnOrder()
 				sleep(.3)
 			pause_end = time()
-			print("exit pause")
 			pause_difference = pause_end - pause_start
+		if Setup.game_state == 5:
+			turnOrder()
 		sleep(.3)
 	Setup.active_turn = 0
 	button.end_time = time()
