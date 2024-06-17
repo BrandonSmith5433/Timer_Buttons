@@ -32,13 +32,12 @@ class SetupAcceptButton(Button):
 					for button in Setup.active_list:
 						button.ledOff()
 						Setup.turn_order.clear()
-						rando_boi = random.randint(0,len(Setup.active_list))
+						rando_boi = random.randint(0,len(Setup.active_list)-1)
 						Setup.turn_order.append(Setup.active_list[rando_boi])
 						Setup.turn_order[0].ledOn()
 						print("rando firsty boi")
 
 	def hold(self):
-		self.held = True
 		game_state = Setup.game_state
 		match game_state:
 			case 3:  #if accept button is held during gameplay it will trigger game end
@@ -53,11 +52,13 @@ class SetupAcceptButton(Button):
 				if not self.held:
 					print("the round has ended")
 					Setup.game_state = 5
+				else:
+					self.held = False
 
 class Setup(Button):
 	active_turn = 0
 	enter_pause = False
-	game_state = 0 #0 = default ---> 1 = setup ---> 2 = turnorder ---> 3 = Game ----> 4 = End of round ----> 5 = pause ---> 6 = cleanup
+	game_state = 0 #0 = default ---> 1 = setup ---> 2 = turnorder ---> 3 = Game ----> 4 = pause ----> 5 = end of round ---> 6 = cleanup
 	button_list = []
 	active_list = []
 	turn_order = []
@@ -70,8 +71,6 @@ class Setup(Button):
 		self.led.off()
 		Setup.addToLists(self)
 		self.color = color
-		self.start_time = time()
-		self.end_time = time()
 		self.when_pressed = Setup.buttonPress
 		self.when_held = Setup.buttonHold
 		self.when_released = Setup.buttonRelease
@@ -205,6 +204,9 @@ def gameSetup():
 	
 def turnOrder():
 	Setup.cycleActive(10)
+	for button in Setup.active_list:
+		button.ledOff()
+	Setup.turn_order.clear
 	Setup.game_state = 2
 	while Setup.game_state == 2:
 		sleep(.3)
@@ -215,36 +217,40 @@ def gameInProgress():
 	for button in Setup.turn_order:
 		Setup.time_list.append(0)
 		button.ledOff
-	turn(Setup.turn_order[0])
+	playerTurn(Setup.turn_order[0])
 	
-def turn(button):
-	pause_difference = 0
+def playerTurn(button):
+	"""This is a full turn
+	It will set the button to active turn, turn it's LED on and start a timer.
+	It will then wait for a release (for next turn) or hold (for pause)
+	It will calculate time and go to next person (removing time for duration paused as needed)"""
+	difference_in_pause = 0
 	button.is_live = True
 	button.ledOn()
-	button.start_time = time()
+	timer_start = time()
 	while Setup.active_turn == 0:
 		if Setup.enter_pause == True:
-			pause_start = time()
+			pause_timer_start = time()
 			while Setup.enter_pause == True:
 				if Setup.game_state == 5:
 					turnOrder()
 				sleep(.3)
-			pause_end = time()
-			pause_difference = pause_end - pause_start
+			pause_timer_end = time()
+			difference_in_pause = pause_timer_end - pause_timer_start
 		if Setup.game_state == 5:
 			turnOrder()
 		sleep(.3)
 	Setup.active_turn = 0
-	button.end_time = time()
-	time_difference = button.end_time - button.start_time - pause_difference
+	timer_end = time()
+	difference_in_time = timer_end - timer_start - difference_in_pause
 	button.ledOff()
 	button.is_live = False
-	Setup.time_list[Setup.turn_order.index(button)] += time_difference
+	Setup.time_list[Setup.turn_order.index(button)] += difference_in_time
 	if Setup.turn_order.index(button) == (len(Setup.turn_order) - 1):
 		button = Setup.turn_order[0]
 	else:
 		button = Setup.turn_order[Setup.turn_order.index(button)+1]
-	turn(button)
+	playerTurn(button)
 
 def gameEnd():
 	with open('testcsv.csv', 'w', newline='') as csvfile:
