@@ -26,36 +26,38 @@ class SetupAcceptButton(Button):
 				Setup.game_state = 2
 			case 2:
 				if len(Setup.turn_order) == len(Setup.active_list):
-					Setup.game_state = 3
 					Setup.turn_order[0].is_live = True
+					Setup.game_state = 3
 				else:
+					Setup.turn_order.clear()
 					for button in Setup.active_list:
 						button.ledOff()
-						Setup.turn_order.clear()
-						rando_boi = random.randint(0,len(Setup.active_list)-1)
-						Setup.turn_order.append(Setup.active_list[rando_boi])
-						Setup.turn_order[0].ledOn()
-						print("rando firsty boi")
+					rando_boi = random.randint(0,len(Setup.active_list)-1)
+					Setup.turn_order.append(Setup.active_list[rando_boi])
+					Setup.turn_order[0].ledOn()
 
 	def hold(self):
 		game_state = Setup.game_state
 		match game_state:
-			case 3:  #if accept button is held during gameplay it will trigger game end
+			case 4:  #if accept button is held during gameplay it will trigger game end
 				self.held = True
-				print("the game has ended")
 				gameEnd()
 
 	def release(self):
 		game_state = Setup.game_state
 		match game_state:
-			case 3:  #If accept button is pushed during gameplay it will trigger end of round
+			case 4:  #If accept button is pushed during gameplay it will trigger end of round
 				if not self.held:
+					for button in Setup.turn_order:
+						button.is_live = False
+					Setup.turn_order.clear()
 					print("the round has ended")
 					Setup.game_state = 5
 				else:
 					self.held = False
 
 class Setup(Button):
+	round_count = 0
 	active_turn = 0
 	enter_pause = False
 	game_state = 0 #0 = default ---> 1 = setup ---> 2 = turnorder ---> 3 = Game ----> 4 = pause ----> 5 = end of round ---> 6 = cleanup
@@ -66,7 +68,7 @@ class Setup(Button):
 	
 	def __init__(self, color, button_pin, led_pin):
 		super().__init__(button_pin, bounce_time = .1)
-		self.is_live = True
+		self.is_live = False
 		self.led = LED(led_pin)
 		self.led.off()
 		Setup.addToLists(self)
@@ -90,20 +92,18 @@ class Setup(Button):
 					self.ledOn()
 
 			case 2: # Determines turn order
-				if self.is_live:
-					Setup.turn_order.append(self)
-					self.ledOn()
-					self.is_live = False
-				else:
+				if self in Setup.turn_order:
 					Setup.turn_order.remove(self)
 					self.ledOff()
-					self.is_live = True
+				else:
+					Setup.turn_order.append(self)
+					self.ledOn()
 
 	def buttonHold(self):
 		'''What is done when a colored button is held'''
 		game_state = Setup.game_state
 		match game_state:
-			case 3: #Active gameplay
+			case 4: #Active gameplay
 				if self.is_live:
 					self.held = True
 					Setup.enter_pause = True
@@ -112,7 +112,7 @@ class Setup(Button):
 		'''What is done when a colored button is released'''
 		game_state = Setup.game_state
 		match game_state:
-			case 3: #Active gameplay
+			case 4: #Active gameplay
 				if self.is_live:
 					if self.held == True & self.count == 1:
 						self.held = False
@@ -192,6 +192,7 @@ class Setup(Button):
 			button.ledFastBlink(Setup.turn_order.index(button)+1)
 			button.ledOff()
 
+	
 def gameSetup():
 	Setup.game_state = 1
 	Setup.cycleAll(5)
@@ -203,18 +204,23 @@ def gameSetup():
 	turnOrder()
 	
 def turnOrder():
+	Setup.game_state = 2
+	Setup.round_count += 1
 	Setup.cycleActive(10)
 	for button in Setup.active_list:
 		button.ledOff()
-	Setup.turn_order.clear
-	Setup.game_state = 2
 	while Setup.game_state == 2:
 		sleep(.3)
-	gameInProgress()
+	if Setup.round_count == 1:
+		gameInProgress()
+	else:
+		playerTurn(Setup.turn_order[0])
 	
 def gameInProgress():
 	Setup.cycleTurn()
+	Setup.game_state = 4
 	for button in Setup.turn_order:
+		print("button")
 		Setup.time_list.append(0)
 		button.ledOff
 	playerTurn(Setup.turn_order[0])
@@ -225,8 +231,10 @@ def playerTurn(button):
 	It will then wait for a release (for next turn) or hold (for pause)
 	It will calculate time and go to next person (removing time for duration paused as needed)"""
 	difference_in_pause = 0
+	Setup.game_state = 4
 	button.is_live = True
 	button.ledOn()
+	indexOf = Setup.turn_order.index(button)
 	timer_start = time()
 	while Setup.active_turn == 0:
 		if Setup.enter_pause == True:
@@ -234,7 +242,10 @@ def playerTurn(button):
 			while Setup.enter_pause == True:
 				if Setup.game_state == 5:
 					turnOrder()
-				sleep(.3)
+				sleep(.15)
+				button.ledOff()
+				sleep(.15)
+				button.ledOn()
 			pause_timer_end = time()
 			difference_in_pause = pause_timer_end - pause_timer_start
 		if Setup.game_state == 5:
@@ -245,7 +256,7 @@ def playerTurn(button):
 	difference_in_time = timer_end - timer_start - difference_in_pause
 	button.ledOff()
 	button.is_live = False
-	Setup.time_list[Setup.turn_order.index(button)] += difference_in_time
+	Setup.time_list[indexOf] += difference_in_time
 	if Setup.turn_order.index(button) == (len(Setup.turn_order) - 1):
 		button = Setup.turn_order[0]
 	else:
@@ -253,6 +264,7 @@ def playerTurn(button):
 	playerTurn(button)
 
 def gameEnd():
+	print("game ending")
 	with open('testcsv.csv', 'w', newline='') as csvfile:
 		writer = csv.writer(csvfile)
 		writer.writerow(['player Color', 'Total Time'])
