@@ -1,0 +1,30 @@
+def simons_sequence_add():
+	randie_inty_boi = random.randint(0, len(Setup.button_list) -1)
+	return(Setup.button_list[randie_inty_boi])
+def the_game():
+	sequence = []
+	player_input = []
+	im_done = 0
+	while im_done != 1:
+		player_input.clear()
+		sequence.append(simons_sequence_add())
+		index = 0
+		for button in sequence:
+			button.ledOn()
+			sleep(.75)
+			button.ledOff()
+			sleep(.18)
+		while len(player_input) < len(sequence):
+			for button in Setup.button_list:
+				if button.is_pressed:
+					button.ledOn()
+					sleep(.1)
+					button.ledOff()
+					player_input.append(button)
+					if player_input[index] != sequence[index]:
+						im_done = 1
+						Setup.flashAll(3)
+						break
+					index += 1
+					sleep(.2)
+the_game()
